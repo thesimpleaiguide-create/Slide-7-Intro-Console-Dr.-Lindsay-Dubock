@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide 7: Dr. Lindsay Dubock • The 4 Hidden Drivers Briefing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0C2340',
+                        deepnavy: '#061426',
+                        trust: '#005EB8',
+                        orange: '#FE5000',
+                        slate: '#333F48',
+                        ice: '#DBE2E9',
+                        cream: '#FBFBFB'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { display: none; }
+        * { scrollbar-width: none; }
+
+        /* Dynamic sentence block styling for real-time speech tracking */
+        .sentence-token {
+            display: block;
+            margin-bottom: 8px;
+            padding: 9px 13px;
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+            transition: all 0.22s ease-out;
+            line-height: 1.6;
+        }
+        .sentence-active {
+            background-color: #FE5000;
+            color: #ffffff !important;
+            font-weight: 600;
+            border-left-color: #0C2340;
+            box-shadow: 0 3px 12px rgba(254, 80, 0, 0.28);
+            transform: translateX(2px);
+        }
+        .sentence-spoken {
+            color: #0C2340;
+            opacity: 0.95;
+            font-weight: 500;
+            border-left-color: #DBE2E9;
+            background-color: rgba(219, 226, 233, 0.25);
+        }
+        .sentence-upcoming {
+            color: #94A3B8;
+            opacity: 0.6;
+            font-weight: 400;
+            border-left-color: transparent;
+            background-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-transparent text-slate font-sans p-2 sm:p-4 flex flex-col items-center justify-start w-full">
+
+    <div class="w-full max-w-4xl mx-auto bg-white border border-ice rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row items-stretch">
+        
+        <!-- Left Column: Interactive Sentence-by-Sentence Speech Console -->
+        <div class="flex-1 p-5 sm:p-6 md:p-7 flex flex-col justify-between space-y-4 order-2 md:order-1">
+            
+            <!-- Header Metadata -->
+            <div>
+                <div class="flex items-center justify-between gap-2 pb-2.5 border-b border-ice/70">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-orange animate-pulse"></span>
+                        <span class="text-xs font-bold uppercase tracking-wider text-trust">
+                            Phase 3 · Abstract Conceptualisation
+                        </span>
+                    </div>
+                    <div id="delayNotice" class="text-[11px] font-mono text-orange font-semibold bg-orange/10 px-2 py-0.5 rounded-md">
+                        Starting in 2s...
+                    </div>
+                </div>
+
+                <h2 class="text-base sm:text-lg font-bold text-navy mt-2.5">
+                    The 4 Hidden Drivers: Diagnostic Briefing
+                </h2>
+            </div>
+
+            <!-- Spoken Words Telemetry Box (Synced Sentence-by-Sentence) -->
+            <div id="transcriptViewport" class="p-4 bg-slate-50 border border-ice/80 rounded-xl overflow-y-auto max-h-[185px] sm:max-h-[210px] leading-relaxed text-sm sm:text-base scroll-smooth">
+                <div id="speechBox" class="leading-relaxed">
+                    <!-- Sentence tokens inserted via JavaScript -->
+                </div>
+            </div>
+
+            <!-- Playback Control Bar -->
+            <div class="pt-2 border-t border-ice flex items-center space-x-3.5">
+                <!-- Play/Pause Button -->
+                <button id="btnPlayPause" onclick="toggleAudio()" 
+                        class="w-11 h-11 rounded-full bg-navy hover:bg-trust text-white flex items-center justify-center transition-transform active:scale-95 shadow-md cursor-pointer shrink-0">
+                    <svg id="playPauseIcon" class="w-5 h-5 ml-0.5 fill-current" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+
+                <!-- Scrubber Progress Bar & Timers -->
+                <div class="flex-1 flex flex-col justify-center">
+                    <div class="w-full bg-ice/90 rounded-full h-2.5 overflow-hidden cursor-pointer" onclick="seekAudio(event)">
+                        <div id="progressBar" class="bg-orange h-full w-0 transition-all duration-75"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] font-mono text-slate/70 mt-1.5">
+                        <span id="currentTimeLabel">00:00</span>
+                        <span id="autoPlayStatus" class="font-sans text-[10px] text-slate/50 hidden sm:inline">2s Auto-start</span>
+                        <span id="totalDurationLabel">00:36</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Dr. Lindsay Portrait (Unfolded Arms) -->
+        <div class="w-full md:w-64 lg:w-72 bg-navy relative shrink-0 min-h-[280px] md:min-h-full flex items-center justify-center overflow-hidden order-1 md:order-2">
+            <img src="./Unfolded_arms_on_background_202609081318.jpeg" 
+                 onerror="this.onerror=null; this.src='./Unfolded_arms_on_background_202609081318.jpg'; if(!this.src.includes('facing_camera')) this.src='./facing_camera.jpeg';"
+                 alt="Dr. Lindsay Dubock" 
+                 class="w-full h-full object-cover object-[50%_15%]">
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-navy/90 via-navy/15 to-transparent pointer-events-none"></div>
+
+            <!-- Portrait Bottom Identity Badge -->
+            <div class="absolute bottom-3.5 left-4 right-4 text-white pointer-events-none">
+                <div class="text-sm font-bold tracking-tight">Dr. Lindsay Dubock</div>
+                <div class="text-[11px] text-ice/85">Director, The Training Network</div>
+            </div>
+
+            <!-- Live Broadcast Audio Indicator Pill -->
+            <div class="absolute top-3.5 right-3.5 bg-navy/85 backdrop-blur-xs text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/20 flex items-center space-x-1.5 shadow-sm">
+                <span id="speakerPulse" class="w-2 h-2 rounded-full bg-orange animate-pulse"></span>
+                <span id="speakerStatus">Ready</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Timed sentence script matching Dr. Lindsay's Hidden Drivers intro
+        const timedPhrases = [
+            { id: 0, start: 0.0, end: 6.8, text: "When a consultation explodes in the first ten seconds, our natural instinct is to label the patient as 'difficult', 'demanding', or 'rude'." },
+            { id: 1, start: 6.9, end: 12.4, text: "But in general practice, patient hostility almost never arrives out of thin air." },
+            { id: 2, start: 12.5, end: 21.0, text: "Across thousands of patient contacts under proactive outreach, we find that over ninety percent of friction stems from just four core emotional engines." },
+            { id: 3, start: 21.1, end: 25.4, text: "We call them the Four Hidden Drivers." },
+            { id: 4, start: 25.5, end: 35.8, text: "Once you learn to spot which driver is firing, the fog clears. You stop taking the bait, and you start applying the clinical remedy." }
+        ];
+
+        // Render sentence tokens into the speech container
+        const speechBox = document.getElementById('speechBox');
+        timedPhrases.forEach((phrase) => {
+            const p = document.createElement('div');
+            p.id = `s-${phrase.id}`;
+            p.className = "sentence-token sentence-upcoming";
+            p.innerText = phrase.text;
+            speechBox.appendChild(p);
+        });
+
+        const audio = new Audio('./HD_S07_Lindsay_HiddenDriversIntro.wav');
+        let isPlaying = false;
+        let ticker = null;
+        let totalDuration = 36.0;
+
+        audio.addEventListener('loadedmetadata', () => {
+            if (audio.duration && !isNaN(audio.duration)) {
+                totalDuration = audio.duration;
+                updateTotalDurationDisplay();
+            }
+        });
+
+        function updateTotalDurationDisplay() {
+            const m = String(Math.floor(totalDuration / 60)).padStart(2, '0');
+            const s = String(Math.floor(totalDuration % 60)).padStart(2, '0');
+            document.getElementById('totalDurationLabel').innerText = `${m}:${s}`;
+        }
+
+        audio.addEventListener('ended', () => {
+            pauseAudio();
+            resetTranscript();
+            document.getElementById('speakerStatus').innerText = "Completed";
+            document.getElementById('speakerPulse').classList.remove('animate-ping');
+        });
+
+        function playAudio() {
+            isPlaying = true;
+            document.getElementById('delayNotice').classList.add('hidden');
+            document.getElementById('playPauseIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+            document.getElementById('speakerStatus').innerText = "Speaking";
+            document.getElementById('speakerPulse').classList.add('animate-ping');
+
+            audio.play().catch(err => {
+                console.warn("Autoplay prevented by browser, falling back to speech synthesis or manual gesture:", err);
+                fallbackSpeechSynthesis();
+            });
+
+            clearInterval(ticker);
+            ticker = setInterval(updateLiveProgress, 40);
+        }
+
+        function pauseAudio() {
+            isPlaying = false;
+            document.getElementById('playPauseIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+            document.getElementById('speakerStatus').innerText = "Paused";
+            document.getElementById('speakerPulse').classList.remove('animate-ping');
+            audio.pause();
+            if ('speechSynthesis' in window) window.speechSynthesis.pause();
+            clearInterval(ticker);
+        }
+
+        function toggleAudio() {
+            if (isPlaying) {
+                pauseAudio();
+            } else {
+                playAudio();
+            }
+        }
+
+        function updateLiveProgress() {
+            const current = audio.currentTime;
+            const pct = Math.min(100, (current / totalDuration) * 100);
+            document.getElementById('progressBar').style.width = `${pct}%`;
+
+            const m = String(Math.floor(current / 60)).padStart(2, '0');
+            const s = String(Math.floor(current % 60)).padStart(2, '0');
+            document.getElementById('currentTimeLabel').innerText = `${m}:${s}`;
+
+            let activeSentenceEl = null;
+
+            timedPhrases.forEach((phrase) => {
+                const el = document.getElementById(`s-${phrase.id}`);
+                if (current >= phrase.start && current < phrase.end) {
+                    el.className = "sentence-token sentence-active";
+                    activeSentenceEl = el;
+                } else if (current >= phrase.end) {
+                    el.className = "sentence-token sentence-spoken";
+                } else {
+                    el.className = "sentence-token sentence-upcoming";
+                }
+            });
+
+            // Auto-scroll to keep active sentence visible
+            if (activeSentenceEl) {
+                const container = document.getElementById('transcriptViewport');
+                const offsetTop = activeSentenceEl.offsetTop - container.offsetTop;
+                if (Math.abs(container.scrollTop - (offsetTop - 20)) > 25) {
+                    container.scrollTo({ top: offsetTop - 20, behavior: 'smooth' });
+                }
+            }
+        }
+
+        function seekAudio(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const targetPct = clickX / rect.width;
+            audio.currentTime = targetPct * totalDuration;
+            updateLiveProgress();
+            if (!isPlaying) {
+                playAudio();
+            }
+        }
+
+        function resetTranscript() {
+            timedPhrases.forEach((phrase) => {
+                const el = document.getElementById(`s-${phrase.id}`);
+                if (el) el.className = "sentence-token sentence-upcoming";
+            });
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('currentTimeLabel').innerText = '00:00';
+            document.getElementById('transcriptViewport').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function fallbackSpeechSynthesis() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const fullText = timedPhrases.map(p => p.text).join(' ');
+                const utterance = new SpeechSynthesisUtterance(fullText);
+                utterance.rate = 0.94;
+                const voices = window.speechSynthesis.getVoices();
+                const ukVoice = voices.find(v => v.lang.includes('en-GB') || v.name.includes('British'));
+                if (ukVoice) utterance.voice = ukVoice;
+
+                utterance.onboundary = function(e) {
+                    const charRatio = e.charIndex / Math.max(1, fullText.length);
+                    const approxTime = charRatio * totalDuration;
+                    timedPhrases.forEach((phrase) => {
+                        const el = document.getElementById(`s-${phrase.id}`);
+                        if (approxTime >= phrase.start && approxTime < phrase.end) {
+                            el.className = "sentence-token sentence-active";
+                        } else if (approxTime >= phrase.end) {
+                            el.className = "sentence-token sentence-spoken";
+                        } else {
+                            el.className = "sentence-token sentence-upcoming";
+                        }
+                    });
+                };
+
+                utterance.onend = () => {
+                    pauseAudio();
+                    resetTranscript();
+                };
+
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // 2-Second Delay on Slide Load
+        window.addEventListener('DOMContentLoaded', () => {
+            let countdown = 2;
+            const delayNotice = document.getElementById('delayNotice');
+
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    delayNotice.innerText = `Starting in ${countdown}s...`;
+                } else {
+                    clearInterval(countdownInterval);
+                    delayNotice.innerText = "Playing...";
+                    playAudio();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
